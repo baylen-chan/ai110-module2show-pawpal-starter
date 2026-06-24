@@ -1,15 +1,50 @@
 classDiagram
-    %% Replace the placeholders below with your actual classes, attributes, methods, and relationships.
-    %% Keep this file updated so it matches your final implementation.
+    %% PawPal+ class design
+    %% Pet owns many CareTasks. Scheduler reads a Pet's tasks and produces a DailyPlan.
 
-    class ClassName {
-        +type attribute
-        +method() returnType
+    class Pet {
+        +str name
+        +str species
+        +str breed
+        +int age
+        +list~CareTask~ tasks
+        +add_task(task) void
+        +remove_task(task) void
+        +edit_task(task, changes) void
+        +get_tasks() list~CareTask~
     }
 
-    class AnotherClass {
-        +type attribute
-        +method() returnType
+    class CareTask {
+        +str name
+        +str task_type
+        +int duration_minutes
+        +str priority
+        +str preferred_time
+        +str recurrence
+        +is_higher_priority_than(other) bool
+        +fits_in(remaining_minutes) bool
     }
 
-    ClassName --> AnotherClass : relationship
+    class Scheduler {
+        +int available_minutes
+        +dict preferences
+        +generate_plan(pet) DailyPlan
+        +sort_tasks(tasks) list~CareTask~
+        +filter_to_budget(tasks) list~CareTask~
+        +resolve_conflicts(entries) list
+    }
+
+    class DailyPlan {
+        +str date
+        +list entries
+        +list~CareTask~ skipped_tasks
+        +str reasoning
+        +add_entry(task, start_time) void
+        +explain() str
+        +to_display() str
+    }
+
+    Pet "1" --> "*" CareTask : has
+    Scheduler ..> Pet : reads
+    Scheduler --> DailyPlan : produces
+    DailyPlan "1" --> "*" CareTask : schedules
