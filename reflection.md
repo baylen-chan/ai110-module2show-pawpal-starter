@@ -2,15 +2,21 @@
 
 ## 1. System Design
 
+- 1. The user should be able to add their pets into the system.
+- 2. The user should be able to schedule certain events. This includes feeding, walks, etc.
+- 3. The user should also have the option to view their tasks after inputting the information in.
+
 **a. Initial design**
 
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
+My UML design has four classes. The CareTask class holds details such as the name, type, duration, priority, preferred time, recurrance. It compares tasks with one another by priority and whether it fits in the time. The Pets class holds the pet's info such as name, species, bred, age. The Pet class also holds the list of its CareTasks. THe Scheduler class does the planning and sorts by priority. It filters them to fit a time and generates the plan. The DailyPlan class is the output. It will display the plan.
 
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+Yes, there were changes. I first stored times and priority as plain text ("08:00", "high"), but the scheduler couldn't do math on a string or sort by it. So I switched times to numbers (minutes since midnight) and made priority an Enum, and added a small ScheduledEntry class to track each task's start/end — which made detecting overlaps easier.
 
 ---
 
