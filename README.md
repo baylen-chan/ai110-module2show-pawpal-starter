@@ -100,19 +100,39 @@ Warnings:
 
 ## 🧪 Testing PawPal+
 
+Run the automated test suite from the project root:
+
 ```bash
-# Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
+python -m pytest
 ```
 
-Sample test output:
+### What the tests cover
+
+The suite (`tests/test_pawpal.py`) exercises the core scheduling behaviors and their edge cases:
+
+- **Core model** — completing a task flips its status; adding a task to a pet grows that pet's task list.
+- **Sorting correctness** — `sort_by_time()` returns tasks in chronological order regardless of insertion order, and pushes untimed tasks (`preferred_time=None`) to the end.
+- **Recurrence logic** — completing a `DAILY` task auto-creates a fresh, uncompleted occurrence due the next day (and a `WEEKLY` task one due seven days out), while a one-off (`ONCE`) task creates no follow-up.
+- **Conflict detection** — two tasks at the same preferred time are flagged; back-to-back tasks that only touch at the boundary are *not* flagged; completed tasks are excluded from conflict checks.
+
+### Sample test output
 
 ```
-# Paste your pytest output here
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/baylenchan/CodePath/ai110-module2show-pawpal-starter
+collected 10 items
+
+tests/test_pawpal.py ..........                                          [100%]
+
+============================== 10 passed in 0.01s ==============================
 ```
+
+### Confidence Level
+
+**★★★★☆ (4 / 5)**
+
+All 10 tests pass and cover the three highest-risk behaviors — sorting, recurrence, and conflict detection — including their boundary cases. One point is held back because the daily plan (`Scheduler.build_daily_plan()`) currently packs tasks back-to-back from `day_start` and does **not** honor each task's `preferred_time`, so the printed plan can disagree with the conflict warnings. That behavior isn't yet locked down by a test, so I'd want to reconcile it before claiming full reliability.
 
 ## 📐 Smarter Scheduling
 
