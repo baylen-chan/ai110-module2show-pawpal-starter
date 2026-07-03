@@ -47,13 +47,55 @@ pip install -r requirements.txt
 Sample of the CLI output from running `python main.py`:
 
 ```
+Tasks in the order they were added
+========================================
+  08:30  Feeding [Biscuit, done]
+  08:00  Morning walk [Biscuit, pending]
+  17:00  Playtime [Mochi, pending]
+  09:00  Litter change [Mochi, pending]
+
+Sorted by time (earliest first)
+========================================
+  08:00  Morning walk [Biscuit, pending]
+  08:30  Feeding [Biscuit, done]
+  09:00  Litter change [Mochi, pending]
+  17:00  Playtime [Mochi, pending]
+
+Filter: only pending tasks
+========================================
+  08:00  Morning walk [Biscuit, pending]
+  17:00  Playtime [Mochi, pending]
+  09:00  Litter change [Mochi, pending]
+
+Filter: only Mochi's tasks
+========================================
+  17:00  Playtime [Mochi, pending]
+  09:00  Litter change [Mochi, pending]
+
+Combined: Mochi's pending tasks, sorted by time
+========================================
+  09:00  Litter change [Mochi, pending]
+  17:00  Playtime [Mochi, pending]
+
+Conflict detection: two tasks scheduled at the same time
+========================================
+  ! Conflict: 'Morning walk' (Biscuit, 08:00-08:30) overlaps 'Vet call' (Biscuit, 08:00-08:15)
+
+Recurring tasks: completing a daily task spawns the next one
+========================================
+  Before: Biscuit has 3 task(s); 'Morning walk' is daily, completed=False
+  After:  Biscuit has 4 task(s)
+  New occurrence auto-created -> due 2026-07-03 (completed=False)
+
 Today's Schedule
 ========================================
 Daily plan for Jordan:
-  08:00 — Feeding (10 min) [Biscuit, priority: high]
-  08:10 — Morning walk (30 min) [Biscuit, priority: high]
-  08:40 — Litter change (10 min) [Mochi, priority: medium]
-  08:50 — Playtime (20 min) [Mochi, priority: low]
+  08:00 — Morning walk (30 min) [Biscuit, priority: high]
+  08:30 — Litter change (10 min) [Mochi, priority: medium]
+  08:40 — Vet call (15 min) [Biscuit, priority: medium]
+  08:55 — Playtime (20 min) [Mochi, priority: low]
+Warnings:
+  ! Conflict: 'Vet call' (Biscuit, 08:00-08:15) overlaps 'Morning walk' (Biscuit, 08:00-08:30)
 ```
 
 ## 🧪 Testing PawPal+
@@ -74,14 +116,14 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
+PawPal+ adds four small algorithms on top of the core classes to make the daily plan more useful.
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `Scheduler.sort_by_time()`, `Scheduler.sort_by_priority()` | `sort_by_time()` orders `(pet, task)` pairs chronologically by `preferred_time` (tasks with no set time sort last); `sort_by_priority()` orders by priority, then shorter tasks, then time. Both use `sorted()` with a `lambda` key. |
+| Filtering | `Owner.filter_tasks(pet_name=..., completed=...)` | Returns `(pet, task)` pairs, optionally narrowed by pet name and/or completion status. Each filter is independent, so you can combine them (e.g. "Mochi's pending tasks") or use neither. |
+| Conflict detection | `Scheduler.detect_conflicts()`, `ScheduledEntry.overlaps()` | Builds a time interval for each timed task and compares every pair with `overlaps()`. Returns a list of warning strings (empty if none) — it warns rather than crashing or auto-rescheduling. |
+| Recurring tasks | `Pet.mark_task_complete()`, `Task.next_occurrence()` | Completing a `DAILY`/`WEEKLY` task auto-creates its next occurrence on the pet. `next_occurrence()` uses `datetime.timedelta` to set the new `due_date` (daily → +1 day, weekly → +7 days); `ONCE` tasks return `None`. |
 
 ## 📸 Demo Walkthrough
 
